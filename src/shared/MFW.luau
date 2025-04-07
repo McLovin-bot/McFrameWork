@@ -7,8 +7,21 @@ local Controllers = {}
 
 local Signals = {}
 
-local function SpawnStart()
-	if RunService:IsClient() then
+local isServer = RunService:IsServer()
+
+local isClient = RunService:IsClient()
+
+local function Init()
+	--initilize client folder
+	print(isClient, isServer)
+	if isClient then
+		print("yo")
+		local ControllersFolder = Instance.new("Folder")
+		ControllersFolder.Parent = script
+		ControllersFolder.Name = "controllers"
+	end
+
+	if isClient then
 		for i, mod in pairs(Controllers) do
 			task.spawn(function()
 				mod:Start()
@@ -38,15 +51,18 @@ function CreateSignal(SignalName: string)
 end
 
 function LoadModules(children: {})
+	--iterate modules
 	for index, module: ModuleScript in ipairs(children) do
+		--make sure we have a module scipt
 		if module:IsA("ModuleScript") then
+			--Controller case
 			if string.match(module.Name, "Controller$") then
+				local controller = require(module)
+				Controllers[module.Name] = controller
+
+			--Service case
+			elseif string.match(module.Name, "Service$") and isServer then
 				local mod = require(module)
-				Controllers[module.Name] = mod
-				--RegisterModuleFunctions(require(module), module)
-			elseif string.match(module.Name, "Service$") and RunService:IsServer() then
-				local mod = require(module)
-				print(mod)
 				local Service = Instance.new("Folder")
 				Service.Parent = script
 				Service.Name = mod.Name
@@ -55,7 +71,6 @@ function LoadModules(children: {})
 					Services.Parent = script
 					Services.Name = "Services"
 				end--]]
-				print(mod)
 				Services[module.Name] = mod
 				if mod.Signals then
 					for i, v in pairs(mod.Signals) do
@@ -69,19 +84,19 @@ end
 
 function McFrameWork.StartClient(modules)
 	LoadModules(modules)
-	SpawnStart()
+	Init()
 	print(Controllers)
 end
 
 function McFrameWork.StartServer(modules)
 	LoadModules(modules)
-	SpawnStart()
+	Init()
 	print(Signals)
 end
 
 function McFrameWork.GetService(service: string)
 	print(service)
-	if RunService:IsServer() then
+	if isServer then
 		if Services[service] then
 			return Services[service]
 		end
