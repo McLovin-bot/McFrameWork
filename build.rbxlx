@@ -82,18 +82,18 @@
 			<Properties>
 				<BinaryString name="AttributesSerialize"></BinaryString>
 				<CoordinateFrame name="CFrame">
-					<X>52.9200287</X>
-					<Y>27.6039829</Y>
-					<Z>-9.82437515</Z>
-					<R00>-0.724169672</R00>
-					<R01>-0.27674672</R01>
-					<R02>0.631656229</R02>
-					<R10>1.49011612e-08</R10>
-					<R11>0.915945768</R11>
-					<R12>0.401302099</R12>
-					<R20>-0.689621925</R20>
-					<R21>0.29061082</R21>
-					<R22>-0.663300097</R22>
+					<X>7.71161842</X>
+					<Y>41.2325935</Y>
+					<Z>-14.6425228</Z>
+					<R00>-0.570718706</R00>
+					<R01>0.398848295</R01>
+					<R02>-0.71777457</R02>
+					<R10>-1.4901163e-08</R10>
+					<R11>0.874113619</R11>
+					<R12>0.485721678</R12>
+					<R20>0.821145773</R20>
+					<R21>0.277210444</R21>
+					<R22>-0.498872876</R22>
 				</CoordinateFrame>
 				<Ref name="CameraSubject">null</Ref>
 				<token name="CameraType">0</token>
@@ -102,9 +102,9 @@
 				<float name="FieldOfView">70</float>
 				<token name="FieldOfViewMode">0</token>
 				<CoordinateFrame name="Focus">
-					<X>32.6971359</X>
-					<Y>14.7560301</Y>
-					<Z>11.4116173</Z>
+					<X>30.691658</X>
+					<Y>25.6818848</Y>
+					<Z>1.32923031</Z>
 					<R00>1</R00>
 					<R01>0</R01>
 					<R02>0</R02>
@@ -311,7 +311,7 @@ gcLgc4RKxr21zq2UlJSM]]></BinaryString>
 					<Y>0</Y>
 					<Z>0</Z>
 				</Vector3>
-				<bool name="ShorelinesUpgraded">false</bool>
+				<bool name="ShorelinesUpgraded">true</bool>
 				<BinaryString name="SmoothGrid">AQU=</BinaryString>
 				<bool name="SmoothVoxelsUpgraded">false</bool>
 				<int64 name="SourceAssetId">-1</int64>
@@ -811,6 +811,7 @@ gcLgc4RKxr21zq2UlJSM]]></BinaryString>
 			<token name="LuaCharacterController">0</token>
 			<string name="Name">StarterPlayer</string>
 			<float name="NameDisplayDistance">100</float>
+			<bool name="RagdollDeath">true</bool>
 			<int64 name="SourceAssetId">-1</int64>
 			<BinaryString name="Tags"></BinaryString>
 			<UniqueId name="UniqueId">21f284ca183e201d07f389b200000336</UniqueId>
@@ -841,9 +842,10 @@ gcLgc4RKxr21zq2UlJSM]]></BinaryString>
 					<ProtectedString name="Source"><![CDATA[local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Modules = ReplicatedStorage:WaitForChild("controllers")
-local MFW = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("MFW"))
+local MFW = require(ReplicatedStorage:WaitForChild("MFW"))
 
-MFW.StartClient(Modules:GetChildren())
+--MFW.StartClient(Modules:GetChildren())
+MFW:StartClient(Modules:GetChildren()) --maybe incorporate get children into mfw
 ]]></ProtectedString>
 					<int64 name="SourceAssetId">-1</int64>
 					<BinaryString name="Tags"></BinaryString>
@@ -1159,27 +1161,49 @@ end]]></ProtectedString>
 					<ProtectedString name="Source"><![CDATA[local RunService = game:GetService("RunService")
 local McFrameWork = {}
 
-local Services = {}
+local MFW = {
+	Controllers = {},
+	Services = {},
+	Signals = {},
+	isServer = RunService:IsServer(),
+}
 
-local Controllers = {}
+function MFW:Init()
+	print(self)
+end
 
-local Signals = {}
+function MFW:test()
+	print(self)
+end
 
-local function SpawnStart()
-	if RunService:IsClient() then
-		for i, mod in pairs(Controllers) do
-			task.spawn(function()
-				mod:Start()
-				debug.setmemorycategory(i)
-			end)
-		end
-	else
-		for i, mod in pairs(Services) do
-			task.spawn(function()
-				mod:Start()
-				debug.setmemorycategory(i)
-			end)
-		end
+return MFW
+
+--[[
+local table1 = setmetatable(test_table, metatable)
+
+print(table1.dog)
+
+local function Init()
+	--initilize client folder
+	local ControllersFolder = Instance.new("Folder")
+	ControllersFolder.Parent = script
+	ControllersFolder.Name = "MFW_Controllers"
+
+	--Controller Start
+	for i, mod in pairs(Controllers) do
+		print(i, mod)
+		task.spawn(function()
+			mod:Start()
+			debug.setmemorycategory(i)
+		end)
+	end
+
+	--Services Start
+	for i, mod in pairs(Services) do
+		task.spawn(function()
+			mod:Start()
+			debug.setmemorycategory(i)
+		end)
 	end
 end
 
@@ -1196,24 +1220,22 @@ function CreateSignal(SignalName: string)
 end
 
 function LoadModules(children: {})
+	--iterate modules
 	for index, module: ModuleScript in ipairs(children) do
+		--make sure we have a module scipt
 		if module:IsA("ModuleScript") then
+			--Controller case
 			if string.match(module.Name, "Controller$") then
+				local controller = require(module)
+				Controllers[module.Name] = controller
+
+			--Service case
+			elseif string.match(module.Name, "Service$") and isServer then
 				local mod = require(module)
-				Controllers[module.Name] = mod
-				--RegisterModuleFunctions(require(module), module)
-			elseif string.match(module.Name, "Service$") and RunService:IsServer() then
-				local mod = require(module)
-				print(mod)
 				local Service = Instance.new("Folder")
 				Service.Parent = script
 				Service.Name = mod.Name
-				--[[if script.Services == nil then
-					local Services = Instance.new("Folder")
-					Services.Parent = script
-					Services.Name = "Services"
-				end--]]
-				print(mod)
+			
 				Services[module.Name] = mod
 				if mod.Signals then
 					for i, v in pairs(mod.Signals) do
@@ -1227,19 +1249,19 @@ end
 
 function McFrameWork.StartClient(modules)
 	LoadModules(modules)
-	SpawnStart()
+	Init()
 	print(Controllers)
 end
 
 function McFrameWork.StartServer(modules)
 	LoadModules(modules)
-	SpawnStart()
+	Init()
 	print(Signals)
 end
 
 function McFrameWork.GetService(service: string)
 	print(service)
-	if RunService:IsServer() then
+	if isServer then
 		if Services[service] then
 			return Services[service]
 		end
@@ -1252,7 +1274,7 @@ function McFrameWork.GetController(controller: string)
 	end
 end
 
-return McFrameWork
+return McFrameWork--]]
 ]]></ProtectedString>
 					<int64 name="SourceAssetId">-1</int64>
 					<BinaryString name="Tags"></BinaryString>
@@ -1298,6 +1320,275 @@ return TestController
 				</Properties>
 			</Item>
 		</Item>
+		<Item class="ModuleScript" referent="RBXBAC3D46098524E97BC2E11BAC05EC820">
+			<Properties>
+				<BinaryString name="AttributesSerialize"></BinaryString>
+				<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+				<bool name="DefinesCapabilities">false</bool>
+				<UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">MFW</string>
+				<string name="ScriptGuid">{D6BCF9F1-F7BE-420C-9CFA-B4A9F5FF81F7}</string>
+				<ProtectedString name="Source"><![CDATA[--Services
+local RunService = game:GetService("RunService")
+
+--Variables
+local McFrameWork = {}
+local Controllers = {}
+local Services = {}
+local Signals = {}
+local isServer = RunService:IsServer()
+
+--Modules
+local Client = require(script.Parent:WaitForChild("Client"))
+local Server = require(script.Parent:WaitForChild("Server"))
+
+--Typing
+
+type Service = {
+	Name: string,
+	Client: {},
+}
+
+type Controller = {
+	Name: string,
+}
+
+local MFW = {}
+
+function MFW:StartClient(controllers: { ModuleScript })
+	for i, controller in ipairs(controllers) do
+		--Spawns controller:Start()
+		MFW:SpawnStart(controller)
+	end
+end
+
+function MFW:StartServer(services: { ModuleScript })
+	for i, service in ipairs(services) do
+		--Spawns service:Start()
+		if service:IsA("ModuleScript") then
+			MFW:SpawnStart(service)
+		end
+	end
+end
+
+function MFW:CreateRemote() end
+
+function MFW:SpawnStart(module: ModuleScript)
+	print(module)
+	local mod = require(module)
+	task.spawn(function()
+		mod:Start()
+		debug.setmemorycategory(module.Name)
+	end)
+end
+
+return MFW
+
+--[[
+local table1 = setmetatable(test_table, metatable)
+
+print(table1.dog)
+
+local function Init()
+	--initilize client folder
+	local ControllersFolder = Instance.new("Folder")
+	ControllersFolder.Parent = script
+	ControllersFolder.Name = "MFW_Controllers"
+
+	--Controller Start
+	for i, mod in pairs(Controllers) do
+		print(i, mod)
+		task.spawn(function()
+			mod:Start()
+			debug.setmemorycategory(i)
+		end)
+	end
+
+	--Services Start
+	for i, mod in pairs(Services) do
+		task.spawn(function()
+			mod:Start()
+			debug.setmemorycategory(i)
+		end)
+	end
+end
+
+function LoadSignals(Service: string, Signals: Folder)
+	for i, signal in ipairs(Signals) do
+		Signals[signal] = CreateSignal(signal)
+	end
+end
+
+function CreateSignal(SignalName: string)
+	local signal = Instance.new("RemoteEvent")
+	signal.Name = SignalName
+	return signal
+end
+
+function LoadModules(children: {})
+	--iterate modules
+	for index, module: ModuleScript in ipairs(children) do
+		--make sure we have a module scipt
+		if module:IsA("ModuleScript") then
+			--Controller case
+			if string.match(module.Name, "Controller$") then
+				local controller = require(module)
+				Controllers[module.Name] = controller
+
+			--Service case
+			elseif string.match(module.Name, "Service$") and isServer then
+				local mod = require(module)
+				local Service = Instance.new("Folder")
+				Service.Parent = script
+				Service.Name = mod.Name
+			
+				Services[module.Name] = mod
+				if mod.Signals then
+					for i, v in pairs(mod.Signals) do
+						table.insert(Signals, i)
+					end
+				end
+			end
+		end
+	end
+end
+
+function McFrameWork.StartClient(modules)
+	LoadModules(modules)
+	Init()
+	print(Controllers)
+end
+
+function McFrameWork.StartServer(modules)
+	LoadModules(modules)
+	Init()
+	print(Signals)
+end
+
+function McFrameWork.GetService(service: string)
+	print(service)
+	if isServer then
+		if Services[service] then
+			return Services[service]
+		end
+	end
+end
+
+function McFrameWork.GetController(controller: string)
+	if Controllers[controller] then
+		return Controllers[controller]
+	end
+end
+
+return McFrameWork--]]
+]]></ProtectedString>
+				<int64 name="SourceAssetId">-1</int64>
+				<BinaryString name="Tags"></BinaryString>
+				<UniqueId name="UniqueId">314a60302f762c4f08030ea600006cf7</UniqueId>
+			</Properties>
+			<Item class="ModuleScript" referent="RBX090940DDAAA240CBBBB1C5B83361F8AB">
+				<Properties>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+					<bool name="DefinesCapabilities">false</bool>
+					<UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">Client</string>
+					<string name="ScriptGuid">{1111E138-1A5D-4159-833D-17AE3F2EC57B}</string>
+					<ProtectedString name="Source"><![CDATA[local Client = {}
+
+function SpawnController(controller: ModuleScript)
+	local mod = require(controller)
+	task.spawn(function()
+		mod:Start()
+		debug.setmemorycategory(controller.Name)
+	end)
+end
+
+function Client.Start(controllers: { ModuleScript })
+	for i, controller in ipairs(controllers) do
+		--Spawns controller:Start()
+		SpawnController(controller)
+	end
+end
+
+return Client
+]]></ProtectedString>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+					<UniqueId name="UniqueId">314a60302f762c4f08030ea600006cf8</UniqueId>
+				</Properties>
+			</Item>
+			<Item class="ModuleScript" referent="RBX205D82F508E24C12A08013385B35B938">
+				<Properties>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+					<bool name="DefinesCapabilities">false</bool>
+					<UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">Comm</string>
+					<string name="ScriptGuid">{F15E39BD-38AF-45E7-89CC-BA7596B3A9E9}</string>
+					<ProtectedString name="Source"><![CDATA[local Comm = {}
+
+return Comm
+]]></ProtectedString>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+					<UniqueId name="UniqueId">314a60302f762c4f08030ea600006cf9</UniqueId>
+				</Properties>
+			</Item>
+			<Item class="ModuleScript" referent="RBX664ACD0CFFF040129B73C94B638B51F5">
+				<Properties>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+					<bool name="DefinesCapabilities">false</bool>
+					<UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">Server</string>
+					<string name="ScriptGuid">{EA1E3929-18E2-4412-A6C7-E175AB1385B3}</string>
+					<ProtectedString name="Source"><![CDATA[local Server = {}
+
+function SpawnService(service: ModuleScript)
+	local mod = require(service)
+	task.spawn(function()
+		mod:Start()
+		debug.setmemorycategory(service.Name)
+	end)
+end
+
+function Server.Start(services: { ModuleScript })
+	for i, service in ipairs(services) do
+		SpawnService(service)
+	end
+end
+
+return Server
+]]></ProtectedString>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+					<UniqueId name="UniqueId">314a60302f762c4f08030ea600006cfb</UniqueId>
+				</Properties>
+			</Item>
+			<Item class="ModuleScript" referent="RBX9820FE57FC984132932606B4731B08FD">
+				<Properties>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+					<bool name="DefinesCapabilities">false</bool>
+					<UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">Start</string>
+					<string name="ScriptGuid">{598F9AC1-00D7-4B7B-8CD0-D377F6A5E48E}</string>
+					<ProtectedString name="Source"><![CDATA[local Init = {}
+
+return Init
+]]></ProtectedString>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+					<UniqueId name="UniqueId">314a60302f762c4f08030ea600006cfc</UniqueId>
+				</Properties>
+			</Item>
+		</Item>
 	</Item>
 	<Item class="ServerScriptService" referent="4">
 		<Properties>
@@ -1328,17 +1619,11 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local Players = game:GetService("Players")
 
-local Modules = ServerScriptService.services
+local Services = ServerScriptService.services
 
-local MFW = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("MFW"))
+local MFW = require(ReplicatedStorage:WaitForChild("MFW"))
 
-MFW.StartServer(Modules:GetChildren())
-
---[[Players.PlayerAdded:Connect(function(player)
-    task.wait(5)
-    print(DataManager.Get(player, "Speed"))
-        
-end)--]]
+MFW:StartServer(Services:GetChildren())
 ]]></ProtectedString>
 				<int64 name="SourceAssetId">-1</int64>
 				<BinaryString name="Tags"></BinaryString>

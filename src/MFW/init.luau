@@ -1,40 +1,85 @@
+--Services
 local RunService = game:GetService("RunService")
+
+--Variables
 local McFrameWork = {}
-
-local Services = {}
-
 local Controllers = {}
-
+local Services = {}
 local Signals = {}
-
 local isServer = RunService:IsServer()
 
-local isClient = RunService:IsClient()
+--Modules
+local Client = require(script.Parent:WaitForChild("Client"))
+local Server = require(script.Parent:WaitForChild("Server"))
+
+--Typing
+
+type Service = {
+	Name: string,
+	Client: {},
+}
+
+type Controller = {
+	Name: string,
+}
+
+local MFW = {}
+
+function MFW:StartClient(controllers: { ModuleScript })
+	for i, controller in ipairs(controllers) do
+		--Spawns controller:Start()
+		MFW:SpawnStart(controller)
+	end
+end
+
+function MFW:StartServer(services: { ModuleScript })
+	for i, service in ipairs(services) do
+		--Spawns service:Start()
+		if service:IsA("ModuleScript") then
+			MFW:SpawnStart(service)
+		end
+	end
+end
+
+function MFW:CreateRemote() end
+
+function MFW:SpawnStart(module: ModuleScript)
+	print(module)
+	local mod = require(module)
+	task.spawn(function()
+		mod:Start()
+		debug.setmemorycategory(module.Name)
+	end)
+end
+
+return MFW
+
+--[[
+local table1 = setmetatable(test_table, metatable)
+
+print(table1.dog)
 
 local function Init()
 	--initilize client folder
-	print(isClient, isServer)
-	if isClient then
-		print("yo")
-		local ControllersFolder = Instance.new("Folder")
-		ControllersFolder.Parent = script
-		ControllersFolder.Name = "controllers"
+	local ControllersFolder = Instance.new("Folder")
+	ControllersFolder.Parent = script
+	ControllersFolder.Name = "MFW_Controllers"
+
+	--Controller Start
+	for i, mod in pairs(Controllers) do
+		print(i, mod)
+		task.spawn(function()
+			mod:Start()
+			debug.setmemorycategory(i)
+		end)
 	end
 
-	if isClient then
-		for i, mod in pairs(Controllers) do
-			task.spawn(function()
-				mod:Start()
-				debug.setmemorycategory(i)
-			end)
-		end
-	else
-		for i, mod in pairs(Services) do
-			task.spawn(function()
-				mod:Start()
-				debug.setmemorycategory(i)
-			end)
-		end
+	--Services Start
+	for i, mod in pairs(Services) do
+		task.spawn(function()
+			mod:Start()
+			debug.setmemorycategory(i)
+		end)
 	end
 end
 
@@ -66,11 +111,7 @@ function LoadModules(children: {})
 				local Service = Instance.new("Folder")
 				Service.Parent = script
 				Service.Name = mod.Name
-				--[[if script.Services == nil then
-					local Services = Instance.new("Folder")
-					Services.Parent = script
-					Services.Name = "Services"
-				end--]]
+			
 				Services[module.Name] = mod
 				if mod.Signals then
 					for i, v in pairs(mod.Signals) do
@@ -109,4 +150,4 @@ function McFrameWork.GetController(controller: string)
 	end
 end
 
-return McFrameWork
+return McFrameWork--]]

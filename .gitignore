@@ -1,9 +1,7 @@
 # Project place file
-/MFWTesting.rbxlx
-/build.rbxlx
-/roblox.yml
-/selene.toml
-/.gitignore
+/*.rbxlx
+/*.yml
+/*.gitignore
 
 
 # Roblox Studio lock files

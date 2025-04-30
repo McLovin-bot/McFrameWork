@@ -4,19 +4,19 @@
     "$className": "DataModel",
 
     "ReplicatedStorage": {
-      "Shared": {
-        "$path": "src/shared"
-      },
+     "MFW": { 
+      "$path": "src/MFW"
+     },
       "controllers" : {
         "$path": "src/controllers"
       }
     },
 
     "ServerScriptService": {
-      "Server": {
-        "$path": "src/server"
+      "Server": {  
+        "$path": "src/server" 
       },
-      "services" : {
+      "services" : { 
         "$path": "src/services"
       }
     },
