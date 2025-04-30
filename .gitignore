@@ -1,7 +1,7 @@
 # Project place file
-/*.rbxlx
-/*.yml
-/*.gitignore
+*.rbxlx
+*.rbxl
+*.yml   
 
 
 # Roblox Studio lock files
