@@ -9,8 +9,9 @@ local Signals = {}
 local isServer = RunService:IsServer()
 
 --Modules
-local Client = require(script.Parent:WaitForChild("Client"))
-local Server = require(script.Parent:WaitForChild("Server"))
+local Comm = require(script:WaitForChild("Comm"))
+local Client = require(script:WaitForChild("Client"))
+local Server = require(script:WaitForChild("Server"))
 
 --Typing
 
@@ -41,7 +42,15 @@ function MFW:StartServer(services: { ModuleScript })
 	end
 end
 
-function MFW:CreateRemote() end
+--remote to pass to client to get service singals and client funcitons
+
+function MFW:CreateSignal(name: string)
+	--comm util
+	local signal = Comm.CreateSignal(name)
+	print(signal)
+	return signal
+	--Signals[name] = signal
+end
 
 function MFW:SpawnStart(module: ModuleScript)
 	print(module)
