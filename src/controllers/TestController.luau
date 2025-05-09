@@ -1,3 +1,6 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local MFW = require(ReplicatedStorage:WaitForChild("MFW"))
+
 local TestController = {
 	Signals = {
 		test = {},
@@ -5,7 +8,7 @@ local TestController = {
 }
 
 function TestController:Start()
-	print("Hello")
+	print(MFW)
 end
 
 return TestController

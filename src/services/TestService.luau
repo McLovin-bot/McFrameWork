@@ -3,13 +3,13 @@ local MFW = require(ReplicatedStorage:WaitForChild("MFW"))
 
 local test = {
 	Name = "Test",
-	Signals = {
+	Client = {
 		yo = MFW:CreateSignal("Test"),
 	},
 }
 
 function test:Start()
-	self.Signals.yo:FireAllClients()
+	self.Client.yo:FireAllClients()
 end
 
 return test
