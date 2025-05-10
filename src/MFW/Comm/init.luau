@@ -1,4 +1,4 @@
-local Signals = script.Signals
+--local Signals = script.Signals
 
 local Comm = {}
 
@@ -8,14 +8,16 @@ local Comm = {}
 function Comm.CreateSignal(name: string)
 	local remote = Instance.new("RemoteEvent")
 	remote.Name = name
-	remote.Parent = Signals
+	--remote.Parent = Signals
 	print(remote)
-	return Signals[name]
+	--return Signals[name]
+	return 1
 end
 
 --look in signal folder and return remote instance
 function Comm.GetSignal(name: string)
-	return Signals:FindFirstChild(name)
+	--return Signals:FindFirstChild(name)
+	return 1
 end
 
 return Comm

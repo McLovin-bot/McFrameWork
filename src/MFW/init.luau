@@ -26,16 +26,48 @@ type Controller = {
 
 local MFW = {}
 
+function MFW:Init()
+	local existing = script.Comm:FindFirstChild("Signals")
+	if not existing then
+		local SignalsFolder = Instance.new("Folder")
+		SignalsFolder.Parent = script.Comm
+		SignalsFolder.Name = "Signals"
+	end
+end
+
+function MFW:CreateSignalFolder(name:string)
+	local SignalsFolder = Instance.new("Folder")
+	SignalsFolder.Parent = script.Comm.Signals
+	SignalsFolder.Name = name
+end
+
+--[[
+	TODO:
+	Use external server and client start
+	spawn client for when players join 
+	create folders for all services in comm 
+
+]]--
+
 function MFW:StartClient(controllers: { ModuleScript })
+	
+	MFW:Init()
+
 	for i, controller in ipairs(controllers) do
 		--Spawns controller:Start()
+
 		MFW:SpawnStart(controller)
 	end
 end
 
+
 function MFW:StartServer(services: { ModuleScript })
+
+	MFW:Init()
+
 	for i, service in ipairs(services) do
 		--Spawns service:Start()
+		MFW:CreateSignalFolder(service.Name)
 		if service:IsA("ModuleScript") then
 			MFW:SpawnStart(service)
 		end
