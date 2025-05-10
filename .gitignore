@@ -1,0 +1,5 @@
+*.rbxlx
+*.yml
+*.vscode
+*.DS_Store
+*.rbxl.lock
