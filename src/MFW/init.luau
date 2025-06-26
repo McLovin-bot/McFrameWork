@@ -1,5 +1,6 @@
 --Services
 local RunService = game:GetService("RunService")
+local ServerScriptService = game:GetService("ServerScriptService")
 
 --Variables
 local McFrameWork = {}
@@ -27,18 +28,25 @@ type Controller = {
 local MFW = {}
 
 function MFW:Init()
-	local existing = script.Comm:FindFirstChild("Signals")
-	if not existing then
-		local SignalsFolder = Instance.new("Folder")
-		SignalsFolder.Parent = script.Comm
-		SignalsFolder.Name = "Signals"
-	end
+	print("MFW INIT")
+
+	
 end
 
-function MFW:CreateSignalFolder(name:string)
-	local SignalsFolder = Instance.new("Folder")
-	SignalsFolder.Parent = script.Comm.Signals
-	SignalsFolder.Name = name
+local function RegisterServices() end
+
+function MFW:CreateSignal(name: string)
+	--return remote
+	-- init signals
+	print(self)
+	Comm.CreateSignal(name)
+end
+
+function CreateFolder(name: string, parent)
+	local Folder = Instance.new("Folder")
+	Folder.Parent = parent
+	Folder.Name = name
+	return Folder
 end
 
 --[[
@@ -47,42 +55,21 @@ end
 	spawn client for when players join 
 	create folders for all services in comm 
 
-]]--
+]]
+--
 
 function MFW:StartClient(controllers: { ModuleScript })
-	
 	MFW:Init()
-
-	for i, controller in ipairs(controllers) do
-		--Spawns controller:Start()
-
-		MFW:SpawnStart(controller)
-	end
+	Comm.Init(controllers)
 end
 
-
 function MFW:StartServer(services: { ModuleScript })
-
+	print(services)
 	MFW:Init()
-
-	for i, service in ipairs(services) do
-		--Spawns service:Start()
-		MFW:CreateSignalFolder(service.Name)
-		if service:IsA("ModuleScript") then
-			MFW:SpawnStart(service)
-		end
-	end
+	Comm.Init(services)
 end
 
 --remote to pass to client to get service singals and client funcitons
-
-function MFW:CreateSignal(name: string)
-	--comm util
-	local signal = Comm.CreateSignal(name)
-	print(signal)
-	return signal
-	--Signals[name] = signal
-end
 
 function MFW:SpawnStart(module: ModuleScript)
 	print(module)

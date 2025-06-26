@@ -9,7 +9,7 @@ local test = {
 }
 
 function test:Start()
-	self.Client.yo:FireAllClients()
+	print("test")
 end
 
 return test
