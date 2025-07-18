@@ -29,8 +29,6 @@ local MFW = {}
 
 function MFW:Init()
 	print("MFW INIT")
-
-	
 end
 
 local function RegisterServices() end
@@ -60,13 +58,13 @@ end
 
 function MFW:StartClient(controllers: { ModuleScript })
 	MFW:Init()
-	Comm.Init(controllers)
+	Comm:Init(controllers)
 end
 
 function MFW:StartServer(services: { ModuleScript })
 	print(services)
 	MFW:Init()
-	Comm.Init(services)
+	Comm:Init(services)
 end
 
 --remote to pass to client to get service singals and client funcitons
