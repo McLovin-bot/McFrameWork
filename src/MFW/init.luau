@@ -37,7 +37,7 @@ function MFW:CreateSignal(name: string)
 	--return remote
 	-- init signals
 	print(self)
-	Comm.CreateSignal(name)
+	Comm:CreateSignal(name)
 end
 
 function CreateFolder(name: string, parent)
@@ -58,7 +58,7 @@ end
 
 function MFW:StartClient(controllers: { ModuleScript })
 	MFW:Init()
-	Comm:Init(controllers)
+	Comm:Init(controllers) -- move into mfw:init
 end
 
 function MFW:StartServer(services: { ModuleScript })
