@@ -8,4 +8,4 @@ local Services = ServerScriptService.services
 
 local MFW = require(ReplicatedStorage:WaitForChild("MFW"))
 
-MFW:StartServer(Services:GetChildren())
+MFW:Start(Services:GetChildren())

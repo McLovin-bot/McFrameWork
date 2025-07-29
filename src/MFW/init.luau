@@ -27,24 +27,27 @@ type Controller = {
 
 local MFW = {}
 
-function MFW:Init()
+function MFW:Init(modules: { ModuleScript })
 	print("MFW INIT")
+
+	Comm:Init(modules)
+
+	--TODO: Check if it has ?
+	for i, mod in ipairs(modules) do
+		self:SpawnStart(mod)
+	end
 end
 
-local function RegisterServices() end
+function MFW:Start(modules: { ModuleScript })
+	MFW:Init(modules)
 
-function MFW:CreateSignal(name: string)
-	--return remote
-	-- init signals
-	print(self)
-	Comm:CreateSignal(name)
+	for i, module in ipairs(modules) do
+		self:SpawnStart(module)
+	end
 end
 
-function CreateFolder(name: string, parent)
-	local Folder = Instance.new("Folder")
-	Folder.Parent = parent
-	Folder.Name = name
-	return Folder
+function MFW:CreateSignal(name: string, signal_group: string)
+	Comm:CreateSignal(name, signal_group)
 end
 
 --[[
@@ -55,20 +58,6 @@ end
 
 ]]
 --
-
-function MFW:StartClient(controllers: { ModuleScript })
-	MFW:Init()
-	Comm:Init(controllers) -- move into mfw:init
-end
-
-function MFW:StartServer(services: { ModuleScript })
-	print(services)
-	MFW:Init()
-	Comm:Init(services)
-end
-
---remote to pass to client to get service singals and client funcitons
-
 function MFW:SpawnStart(module: ModuleScript)
 	print(module)
 	local mod = require(module)
