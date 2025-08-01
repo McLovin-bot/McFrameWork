@@ -1,5 +1,5 @@
 # McFrameWork Beta.1
-Rojo developemnt workspace
+Rojo development workspace
 
 # Why MFW?
 
