@@ -6,7 +6,6 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local McFrameWork = {}
 local Controllers = {}
 local Services = {}
-local Signals = {}
 local isServer = RunService:IsServer()
 
 --Modules
@@ -28,22 +27,21 @@ type Controller = {
 local MFW = {}
 
 function MFW:Init(modules: { ModuleScript })
-	print("MFW INIT")
-
 	Comm:Init(modules)
 
 	--TODO: Check if it has ?
 	for i, mod in ipairs(modules) do
+		if isServer then
+			Services[mod.Name] = require(mod)
+		else
+			Controllers[mod.Name] = require(mod)
+		end
 		self:SpawnStart(mod)
 	end
 end
 
 function MFW:Start(modules: { ModuleScript })
 	MFW:Init(modules)
-
-	for i, module in ipairs(modules) do
-		self:SpawnStart(module)
-	end
 end
 
 function MFW:CreateSignal(name: string, signal_group: string)
@@ -59,7 +57,6 @@ end
 ]]
 --
 function MFW:SpawnStart(module: ModuleScript)
-	print(module)
 	local mod = require(module)
 	task.spawn(function()
 		mod:Start()

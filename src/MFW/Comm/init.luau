@@ -18,8 +18,6 @@ function Comm:CreateFolder(name: string)
 end
 
 function Comm:ConnectSignal(signal: RemoteEvent, signal_group: string)
-	print(signal_group)
-
 	self.RegisteredSignals[signal_group][signal.Name] = signal
 
 	if script[signal_group]:FindFirstChild(signal.Name) then
@@ -27,9 +25,6 @@ function Comm:ConnectSignal(signal: RemoteEvent, signal_group: string)
 	end
 
 	signal.Parent = script:FindFirstChild(signal_group)
-	print(self.RegisteredSignals)
-
-	print(signal.Parent)
 
 	if signal.Parent and self.RegisteredSignals[signal.Name] then
 		return true
@@ -73,7 +68,6 @@ function Comm:CreateSignalGroup(signal_group: string)
 end
 
 function Comm:CreateSignal(name: string, signal_group: string)
-	print(name, signal_group)
 	--locate signal group or create new signal group
 	local signal = Instance.new("RemoteEvent")
 	signal.Name = name

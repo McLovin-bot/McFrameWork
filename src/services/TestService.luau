@@ -7,7 +7,6 @@ local test = {
 }
 
 function test:Start()
-	print("test")
 	MFW:CreateSignal("test", "test")
 	MFW:CreateSignal("yo", "test")
 end

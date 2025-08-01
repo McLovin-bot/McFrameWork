@@ -8,9 +8,8 @@ local TestController = {
 }
 
 function TestController:Start()
-	local service = MFW:GetService("TestService")
-	print("controlelr")
-	print(service)
+	--local service = MFW:GetService("TestService")
+	print("Controller")
 end
 
 return TestController
