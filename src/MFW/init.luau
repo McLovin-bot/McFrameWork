@@ -38,6 +38,9 @@ function MFW:Init(modules: { ModuleScript })
 		end
 		self:SpawnStart(mod)
 	end
+
+	print(Services)
+	print(Controllers)
 end
 
 function MFW:Start(modules: { ModuleScript })
@@ -45,7 +48,7 @@ function MFW:Start(modules: { ModuleScript })
 end
 
 function MFW:CreateSignal(name: string, signal_group: string)
-	Comm:CreateSignal(name, signal_group)
+	return Comm:CreateSignal(name, signal_group)
 end
 
 --[[
@@ -56,6 +59,7 @@ end
 
 ]]
 --
+
 function MFW:SpawnStart(module: ModuleScript)
 	local mod = require(module)
 	task.spawn(function()
@@ -66,6 +70,7 @@ end
 
 function MFW:GetService(ServiceName: string)
 	--return table of signals and client-funtions
+	return Services[ServiceName]
 end
 
 return MFW

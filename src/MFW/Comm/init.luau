@@ -9,6 +9,9 @@ function Comm:Init()
 	for i, signal in ipairs(self.CoreSignals) do
 		self:CreateSignal(signal, "Core")
 	end
+
+	print(self.CoreSignals)
+	print(self.RegisteredSignals)
 end
 
 function Comm:CreateFolder(name: string)

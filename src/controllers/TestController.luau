@@ -8,8 +8,13 @@ local TestController = {
 }
 
 function TestController:Start()
-	--local service = MFW:GetService("TestService")
-	print("Controller")
+	local service = MFW:GetService("TestService")
+	local testSignal = service.Client.TestSignal
+	print("ESTST" .. testSignal)
+	testSignal:Connect(function(...)
+		print("Going")
+	end)
+	print(service)
 end
 
 return TestController

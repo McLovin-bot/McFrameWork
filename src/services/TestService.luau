@@ -3,12 +3,18 @@ local MFW = require(ReplicatedStorage:WaitForChild("MFW"))
 
 local test = {
 	Name = "Test",
-	Client = {},
+	Client = {
+		TestSignal = MFW:CreateSignal("TestSignal", "Test"),
+	},
 }
 
 function test:Start()
-	MFW:CreateSignal("test", "test")
-	MFW:CreateSignal("yo", "test")
+	print(self.Client.TestSignal)
+
+	local Players = game:GetService("Players")
+	Players.PlayerAdded:Connect(function(player)
+		self.Client.TestSignal:FireClient(player, "test")
+	end)
 end
 
 return test
