@@ -13,6 +13,7 @@ function test:Start()
 
 	local Players = game:GetService("Players")
 	Players.PlayerAdded:Connect(function(player)
+		print("GOIGOIGOGIGOI")
 		self.Client.TestSignal:FireClient(player, "test")
 	end)
 end

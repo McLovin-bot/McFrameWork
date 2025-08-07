@@ -1,5 +1,6 @@
 --Services
 local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
 local ServerScriptService = game:GetService("ServerScriptService")
 
 --Variables
@@ -39,8 +40,19 @@ function MFW:Init(modules: { ModuleScript })
 		self:SpawnStart(mod)
 	end
 
+	local GetService: RemoteEvent = Comm:GetSignal("GetService")
+
+	print(GetService)
+
+	--[[
+	GetService.OnServerEvent:Connect(function(player, ServiceName)
+		local service = self:GetService(ServiceName)
+
+		GetService:FireClient(player, service)
+	end)
+
 	print(Services)
-	print(Controllers)
+	print(Controllers)--]]
 end
 
 function MFW:Start(modules: { ModuleScript })
@@ -70,7 +82,20 @@ end
 
 function MFW:GetService(ServiceName: string)
 	--return table of signals and client-funtions
-	return Services[ServiceName]
+
+	--case:1 Server
+	if isServer then
+		if Services[ServiceName] then
+			return Services[ServiceName]
+
+		--case:2 Client
+		else
+			local GetService: RemoteEvent = Comm:GetSignal("GetService")
+			GetService:FireServer(Players.LocalPlayer, ServiceName)
+		end
+	end
+
+	return false
 end
 
-return MFW
+return {}

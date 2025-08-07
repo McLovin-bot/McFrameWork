@@ -80,8 +80,12 @@ function Comm:CreateSignal(name: string, signal_group: string)
 	return signal
 end
 
-function Comm:GetSignal(name: string) end
+function Comm:GetSignal(name: string)
+	if self.RegisteredSignals[name] then
+		return self.RegisteredSignals[name]
+	end
+end
 
 function Comm.CreateCoreSignals() end
 
-return Comm
+return {}
