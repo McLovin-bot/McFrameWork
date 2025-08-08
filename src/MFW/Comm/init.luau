@@ -1,3 +1,6 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
+
 local Comm = {
 	CoreSignals = {
 		"GetService",
@@ -81,11 +84,16 @@ function Comm:CreateSignal(name: string, signal_group: string)
 end
 
 function Comm:GetSignal(name: string)
-	if self.RegisteredSignals[name] then
-		return self.RegisteredSignals[name]
+	print(self.RegisteredSignals)
+	for signalGroup, signals in pairs(self.RegisteredSignals) do
+		for signal_name, signal in pairs(signals) do
+			if signal_name == name then
+				return signal
+			end
+		end
 	end
 end
 
 function Comm.CreateCoreSignals() end
 
-return {}
+return Comm

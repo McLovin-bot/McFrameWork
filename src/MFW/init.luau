@@ -1,7 +1,9 @@
 --Services
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local ServerScriptService = game:GetService("ServerScriptService")
+
 
 --Variables
 local McFrameWork = {}
@@ -13,6 +15,7 @@ local isServer = RunService:IsServer()
 local Comm = require(script:WaitForChild("Comm"))
 local Client = require(script:WaitForChild("Client"))
 local Server = require(script:WaitForChild("Server"))
+local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
 
 --Typing
 
@@ -30,6 +33,7 @@ local MFW = {}
 function MFW:Init(modules: { ModuleScript })
 	Comm:Init(modules)
 
+
 	--TODO: Check if it has ?
 	for i, mod in ipairs(modules) do
 		if isServer then
@@ -40,9 +44,21 @@ function MFW:Init(modules: { ModuleScript })
 		self:SpawnStart(mod)
 	end
 
-	local GetService: RemoteEvent = Comm:GetSignal("GetService")
+	local function waitForSignal()
+		return Promise.new(function(resolve, reject, onCancel)
+			task.wait(1)
+			local signal = Comm:GetSignal("GetService")
+			print(typeof(signal))
+			if signal then
+				print("Signal Found")
+				resolve(signal)
+			else
+				reject("not found")
+			end
+		end)
+	end
 
-	print(GetService)
+	Promise.retry(waitForSignal, 50)
 
 	--[[
 	GetService.OnServerEvent:Connect(function(player, ServiceName)
@@ -92,10 +108,11 @@ function MFW:GetService(ServiceName: string)
 		else
 			local GetService: RemoteEvent = Comm:GetSignal("GetService")
 			GetService:FireServer(Players.LocalPlayer, ServiceName)
+
 		end
 	end
 
 	return false
 end
 
-return {}
+return MFW

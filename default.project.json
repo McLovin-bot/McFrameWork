@@ -9,6 +9,9 @@
      },
       "controllers" : {
         "$path": "src/controllers"
+      },
+      "Promise": {
+        "$path": "src/Promise"
       }
     },
 
