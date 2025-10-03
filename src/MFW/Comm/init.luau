@@ -4,17 +4,19 @@ local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
 local Comm = {
 	CoreSignals = {
 		"GetService",
+		"Sync",
 	},
 	RegisteredSignals = {},
 }
 
+--turn into promise
 function Comm:Init()
-	for i, signal in ipairs(self.CoreSignals) do
-		self:CreateSignal(signal, "Core")
-	end
-
-	print(self.CoreSignals)
-	print(self.RegisteredSignals)
+	return Promise.new(function(resolve, reject)
+		for i, signal in ipairs(self.CoreSignals) do
+			self:CreateSignal(signal, "Core")
+		end
+		resolve(true)
+	end)
 end
 
 function Comm:CreateFolder(name: string)

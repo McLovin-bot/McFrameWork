@@ -1,3 +1,0 @@
-local Init = {}
-
-return Init

@@ -10,4 +10,4 @@ local MFW = require(ReplicatedStorage:WaitForChild("MFW"))
 
 print(MFW)
 
-MFW:Start(Services:GetChildren())
+MFW:Init(Services:GetChildren())

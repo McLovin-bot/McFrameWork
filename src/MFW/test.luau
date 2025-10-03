@@ -2,7 +2,7 @@ local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
-local Comm = require(script.Comm)
+local Comm = require(script.Parent.Comm)
 local MFW = {}
 
 local Services = {}
@@ -15,14 +15,13 @@ end
 function MFW:Init(modules: { ModuleScript })
 	--Init communication module
 	Comm:Init():await()
-	print("Done")
 	--Process services and controllers
 	self:ProcessModules(modules)
 	--Client Communication
 	--GetService init
 end
 
-function SpawnModule(service: ModuleScript)
+function SpawnService(service: ModuleScript)
 	local mod = require(service)
 	task.spawn(function()
 		mod:Start()
@@ -37,20 +36,11 @@ function MFW:ProcessModules(modules: { ModuleScript })
 		else
 			Controllers[mod.Name] = require(mod)
 		end
-		--self:SpawnStart(mod)
-		SpawnModule(mod)
+		self:SpawnStart(mod)
 	end
 end
 
-function MFW:GetService(service_name: string)
-	--client vs server
-
-	--client
-	--fire getservice signal and wait for signal then
-	return Promise.new(function(resolve, reject)
-		resolve(Services)
-	end)
-end
+function MFW:GetService() end
 
 function MFW:CreateSignal() end
 
@@ -181,75 +171,3 @@ return MFW
 
 ]]
 --
-
---[[local RunService = game:GetService("RunService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
-local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
-local Comm = require(script.Comm)
-
-local MFW = {}
-
-local Services = {}
-local Controllers = {}
-
-function MFW:Start()
-	MFW:Init()
-end
-
-function MFW:Init(modules: { ModuleScript })
-	print(modules)
-	--Init communication module
-	Comm:Init()
-	--rocess services and controllers
-	self:ProcessModules(modules)
-	--Client Communication
-	--GetService init
-	print(Services)
-	print(Controllers)
-end
-
-function MFW:ProcessModules(modules: { ModuleScript })
-	for i, mod in ipairs(modules) do
-		if RunService:IsServer() then
-			Services[mod.Name] = require(mod)
-		else
-			Controllers[mod.Name] = require(mod)
-		end
-		--self:SpawnStart(mod)
-	end
-end
-
-function MFW:ServerSync() end
-
-function MFW:ClientSync() end
-
-function MFW:Sync()
-	--[[
-		
-	
-	SYNC:onserver
-	SYNC:onclient
-
-
-
-
-	if RunService:IsServer() then
-		local ClientServices = {}
-		for i, service in ipairs(Services) do
-			if service.Client then
-				table.insert(ClientServices, service.Client)
-			end
-		end
-		return ClientServices
-	else
-	end
-end
-
-function MFW:GetService(serviceName: string) end
-
-function MFW:CreateSignal() end
-
-
-return MFW
---]]

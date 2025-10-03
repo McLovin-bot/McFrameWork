@@ -14,9 +14,8 @@ function TestController:Start()
 	--local testSignal = service.Client.TestSignal
 	--print("ESTST" .. testSignal)
 	--testSignal:Connect(function(...)
-		--print("Going")
+	--print("Going")
 	--end)
-	print(service)
 end
 
 return TestController
