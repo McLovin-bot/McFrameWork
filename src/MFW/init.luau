@@ -32,14 +32,18 @@ end
 
 function MFW:ProcessModules(modules: { ModuleScript })
 	for i, mod in ipairs(modules) do
-		if RunService:IsServer() then
+		
+			
+		if string.match(mod.Name, "Service") then
 			Services[mod.Name] = require(mod)
-		else
+		elseif string.match(mod.Name, "Controller") then
 			Controllers[mod.Name] = require(mod)
 		end
 		--self:SpawnStart(mod)
 		SpawnModule(mod)
 	end
+	print(Services)
+	print(Controllers)
 end
 
 function MFW:GetService(service_name: string)
@@ -48,6 +52,9 @@ function MFW:GetService(service_name: string)
 	--client
 	--fire getservice signal and wait for signal then
 	return Promise.new(function(resolve, reject)
+
+		local service = 
+
 		resolve(Services)
 	end)
 end
