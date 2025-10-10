@@ -1,5 +1,6 @@
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
 
 local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
 local Comm = require(script.Comm)
@@ -11,11 +12,62 @@ local Controllers = {}
 function MFW:Start()
 	MFW:Init()
 end
+local function RemoteEventHandler(RemoteEvent: RemoteEvent, callback)
+	if RunService:IsServer() then
+		RemoteEvent.OnServerEvent:Connect(callback)
+	else
+		RemoteEvent.OnClientEvent:Connect(callback)
+	end
+end
+
+local function GetServiceServerHandler()
+	return Promise.new(function(resolve, reject)
+		local GetService: RemoteEvent = Comm:GetSignal("GetService")
+		if GetService then
+			RemoteEventHandler(GetService, function(player, service_name)
+				if Services[service_name] then
+					GetService:FireClient(player, Services[service_name])
+				end
+			end)
+		end
+		resolve(true)
+	end)
+end
+
+local function GetServiceClientHandler()
+	return Promise.new(function(resolve, reject)
+		local GetService: RemoteEvent = Comm:GetSignal("GetService")
+		if GetService then
+			RemoteEventHandler(GetService, function(service)
+				print(service)
+				if service then
+					Services[service.Name] = service
+				end
+				print(Services)
+			end)
+		end
+	end)
+end
+
+local function GetServiceInit()
+	if RunService:IsServer() then
+		return Promise.new(function(resolve, reject)
+			GetServiceServerHandler()
+			resolve(true)
+		end)
+	else
+		return Promise.new(function(resolve, reject)
+			GetServiceClientHandler()
+			resolve(true)
+		end)
+	end
+end
 
 function MFW:Init(modules: { ModuleScript })
 	--Init communication module
 	Comm:Init():await()
-	print("Done")
+
+	GetServiceInit():await()
 	--Process services and controllers
 	self:ProcessModules(modules)
 	--Client Communication
@@ -32,8 +84,6 @@ end
 
 function MFW:ProcessModules(modules: { ModuleScript })
 	for i, mod in ipairs(modules) do
-		
-			
 		if string.match(mod.Name, "Service") then
 			Services[mod.Name] = require(mod)
 		elseif string.match(mod.Name, "Controller") then
@@ -42,24 +92,42 @@ function MFW:ProcessModules(modules: { ModuleScript })
 		--self:SpawnStart(mod)
 		SpawnModule(mod)
 	end
-	print(Services)
-	print(Controllers)
+end
+
+function get_service(service_name)
+	local GetService: RemoteEvent = Comm:GetSignal("GetService")
+	GetService:FireServer(service_name)
+	return Promise.new(function(resolve, reject)
+		local service = Services[service_name]
+		resolve(service)
+	end)
 end
 
 function MFW:GetService(service_name: string)
 	--client vs server
 
-	--client
-	--fire getservice signal and wait for signal then
 	return Promise.new(function(resolve, reject)
-
-		local service = 
-
-		resolve(Services)
+		if RunService:IsClient() then
+			--wait for server to fire client which will add service to service table
+			local service = get_service(service_name):await()
+			print(service)
+			--service:andThen(print)
+			--[[GetService.OnClientEvent:Connect(function(service)
+				print(service)
+				resolve(service)
+			end)--]]
+		elseif RunService:IsServer() then
+			if Services[service_name] then
+				resolve(require(Services[service_name]))
+			end
+		end
 	end)
 end
 
-function MFW:CreateSignal() end
+function MFW:CreateSignal(signal_name, signal_group)
+	local signal = Comm:CreateSignal(signal_name, signal_group)
+	return signal
+end
 
 return MFW
 

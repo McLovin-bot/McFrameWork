@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
 
 local Comm = {
@@ -9,15 +10,28 @@ local Comm = {
 	RegisteredSignals = {},
 }
 
+local function SignalInit(self)
+	if RunService:IsServer() then
+		return Promise.new(function(resolve, reject)
+			for i, signal in ipairs(self.CoreSignals) do
+				self:CreateSignal(signal, "Core")
+			end
+			resolve(true)
+		end)
+	end
+end
+
 --turn into promise
 function Comm:Init()
 	return Promise.new(function(resolve, reject)
-		for i, signal in ipairs(self.CoreSignals) do
-			self:CreateSignal(signal, "Core")
-		end
+		SignalInit(self):await()
 		resolve(true)
 	end)
 end
+
+function GetServiceClient() end
+
+function GetServiceServer() end
 
 function Comm:CreateFolder(name: string)
 	local folder = Instance.new("Folder")
@@ -86,10 +100,11 @@ function Comm:CreateSignal(name: string, signal_group: string)
 end
 
 function Comm:GetSignal(name: string)
-	print(self.RegisteredSignals)
-	for signalGroup, signals in pairs(self.RegisteredSignals) do
-		for signal_name, signal in pairs(signals) do
-			if signal_name == name then
+	local signals = script:GetChildren()
+
+	for index, signal_group: RemoteEvent in ipairs(signals) do
+		for index, signal: RemoteEvent in ipairs(signal_group:GetChildren()) do
+			if signal.Name == name then
 				return signal
 			end
 		end
