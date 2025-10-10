@@ -3,11 +3,9 @@ Rojo development workspace
 
 # Why MFW?
 
-- MFW allows for easy controller and service scripting architect 
+- Service and Controller script archetype  
 
-- MFW allows for easy signal/remote event creation and use 
-
-- MFW is very lightweight without bloat very barebones framework 
+- Server and Client communication simplified
 
 # Rojo Build  
 
