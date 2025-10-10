@@ -11,9 +11,7 @@ function TestController:Start()
 	print("yo")
 	local service = MFW:GetService("TestService")
 
-	service:andThen(function(service)
-		print(service)
-	end)
+	service:andThen(print)
 end
 
 return TestController

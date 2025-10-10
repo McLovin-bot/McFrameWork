@@ -98,7 +98,11 @@ function get_service(service_name)
 	local GetService: RemoteEvent = Comm:GetSignal("GetService")
 	GetService:FireServer(service_name)
 	return Promise.new(function(resolve, reject)
-		local service = Services[service_name]
+		local service
+		repeat
+			service = Services[service_name]
+			task.wait()
+		until service ~= nil
 		resolve(service)
 	end)
 end
@@ -109,16 +113,15 @@ function MFW:GetService(service_name: string)
 	return Promise.new(function(resolve, reject)
 		if RunService:IsClient() then
 			--wait for server to fire client which will add service to service table
-			local service = get_service(service_name):await()
-			print(service)
-			--service:andThen(print)
-			--[[GetService.OnClientEvent:Connect(function(service)
-				print(service)
-				resolve(service)
-			end)--]]
+			local servicePromise = get_service(service_name)
+			servicePromise:andThen(function(service)
+				if service.Client then
+					resolve(service.Client)
+				end
+			end)
 		elseif RunService:IsServer() then
 			if Services[service_name] then
-				resolve(require(Services[service_name]))
+				resolve(Services[service_name])
 			end
 		end
 	end)
